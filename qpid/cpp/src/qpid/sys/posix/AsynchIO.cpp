@@ -440,7 +440,6 @@ void AsynchIO::readable(DispatchHandle& h) {
             if (rc > 0) {
                 buff->dataCount += rc;
                 threadReadTotal = threadReadTotal + rc;
-                readTotal += rc;
 
                 readCallback(*this, buff);
                 if (readingStopped) {
