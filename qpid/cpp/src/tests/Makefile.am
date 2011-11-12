@@ -17,6 +17,10 @@
 # under the License.
 #
 
+if MAC
+  BOOST_SUFFIX = -mt
+endif
+
 AM_CXXFLAGS = $(WARNING_CFLAGS) -DBOOST_TEST_DYN_LINK
 INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include -I$(top_srcdir)/src -I$(top_builddir)/src
 PUBLIC_INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include # Use public API only
@@ -67,7 +71,7 @@ tmodule_LTLIBRARIES=
 
 TESTS+=unit_test
 check_PROGRAMS+=unit_test
-unit_test_LDADD=-lboost_unit_test_framework \
+unit_test_LDADD=-lboost_unit_test_framework$(BOOST_SUFFIX) \
 	$(lib_messaging) $(lib_broker) $(lib_console) $(lib_qmf2)
 
 unit_test_SOURCES= unit_test.cpp unit_test.h \
@@ -279,9 +283,12 @@ check_PROGRAMS+=PollerTest
 PollerTest_SOURCES=PollerTest.cpp
 PollerTest_LDADD=$(lib_common) $(lib_client) $(SOCKLIBS)
 
-check_PROGRAMS+=DispatcherTest
-DispatcherTest_SOURCES=DispatcherTest.cpp
-DispatcherTest_LDADD=$(lib_common) $(lib_client) $(SOCKLIBS)
+#TODO agoldste 2011-11-08 - figure out how to make this work on the mac
+if !MAC
+  check_PROGRAMS+=DispatcherTest
+  DispatcherTest_SOURCES=DispatcherTest.cpp
+  DispatcherTest_LDADD=$(lib_common) $(lib_client) $(SOCKLIBS)
+endif
 
 check_PROGRAMS+=datagen
 datagen_SOURCES=datagen.cpp

@@ -24,6 +24,10 @@ INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include
 CLIENT_LIB=$(top_builddir)/src/libqpidmessaging.la
 CLIENTFLAGS=-lqpidmessaging
 
+if MAC
+  CLIENTLDFLAGS = -framework Foundation
+endif
+
 noinst_PROGRAMS=drain spout client server map_sender map_receiver hello_world hello_xml
 
 hello_world_SOURCES=hello_world.cpp

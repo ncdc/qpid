@@ -24,6 +24,7 @@
 #include "unit_test.h"
 
 #include <set>
+#include <boost/algorithm/string.hpp>
 
 namespace qpid {
 namespace tests {
@@ -71,7 +72,9 @@ QPID_AUTO_TEST_CASE(testUuidOstream) {
     ostringstream out;
     out << uuid;
     BOOST_CHECK(out.good());
-    BOOST_CHECK_EQUAL(out.str(), sampleStr);
+    string s1 = out.str();
+    boost::algorithm::to_lower(s1);
+    BOOST_CHECK_EQUAL(s1, sampleStr);
 
     ostringstream os;
     os << Uuid();

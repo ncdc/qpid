@@ -21,9 +21,19 @@
 # Copy the global QPID_VERSION.txt file into the source tree.
 cp ../QPID_VERSION.txt .
 
-aclocal -I m4
+OS=`uname`
+if [ "$OS" == "Darwin" ]; then
+  LIBTOOLIZE=glibtoolize
+  ACLOCAL_EXTRAS="-I /usr/local/share/aclocal"
+else
+  LIBTOOLIZE=libtoolize
+  ACLOCAL_EXTRAS=""
+fi
+
+aclocal -I m4 $ACLOCAL_EXTRAS
 autoheader
-libtoolize --automake
+$LIBTOOLIZE --automake
+
 
 # Create initial Makefile fragments that will force make to generate
 # the real ones.

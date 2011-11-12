@@ -351,7 +351,7 @@ void ManagementObject::readTimestamps (const types::Variant::Map& map)
 void ManagementObject::setReference(ObjectId) {}
 
 int ManagementObject::getThreadIndex() {
-    static QPID_TSS int thisIndex = -1;
+    QPID_TSS(int, thisIndex, -1);
     if (thisIndex == -1) {
         Mutex::ScopedLock mutex(accessLock);
         thisIndex = nextThreadIndex;

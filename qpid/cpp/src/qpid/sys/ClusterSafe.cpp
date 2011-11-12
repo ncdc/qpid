@@ -29,7 +29,7 @@ namespace sys {
 
 namespace {
 bool inCluster = false;
-QPID_TSS bool inContext = false;
+QPID_TSS(bool,inContext, false);
 }
 
 bool isClusterSafe() { return !inCluster || inContext; }

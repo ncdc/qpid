@@ -19,6 +19,8 @@
  *
  */
 
+#include "config.h"
+
 #include "qpid/sys/posix/PrivatePosix.h"
 
 #include "qpid/sys/Time.h"
@@ -28,6 +30,11 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <iomanip>
+
+#ifdef HAVE_MACH_CLOCK_GET_TIME
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
 
 namespace {
 int64_t max_abstime() { return std::numeric_limits<int64_t>::max(); }
@@ -51,7 +58,19 @@ AbsTime AbsTime::FarFuture() {
 
 AbsTime AbsTime::now() {
     struct timespec ts;
+#ifdef HAVE_CLOCK_GETTIME
     ::clock_gettime(CLOCK_REALTIME, &ts);
+#elif defined(HAVE_MACH_CLOCK_GET_TIME)
+    clock_serv_t cclock;
+    mach_timespec_t mts;
+    host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
+    ts.tv_sec = mts.tv_sec;
+    ts.tv_nsec = mts.tv_nsec;
+#else
+    #error Unabled to find valid clock routines
+#endif
     AbsTime time_now;
     time_now.timepoint = toTime(ts).nanosecs;
     return time_now;
@@ -106,7 +125,19 @@ void outputFormattedNow(std::ostream& o) {
 
 void outputHiresNow(std::ostream& o) {
     ::timespec time;
+#ifdef HAVE_CLOCK_GETTIME
     ::clock_gettime(CLOCK_REALTIME, &time);
+#elif defined(HAVE_MACH_CLOCK_GET_TIME)
+    clock_serv_t cclock;
+    mach_timespec_t mts;
+    host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
+    time.tv_sec = mts.tv_sec;
+    time.tv_nsec = mts.tv_nsec;
+#else
+    #error Unabled to find valid clock routines
+#endif
     o << time.tv_sec << "." << std::setw(9) << std::setfill('0') << time.tv_nsec << "s ";
 }
 

@@ -2920,7 +2920,7 @@ namespace qpid {
 namespace management {
 
 namespace {
-QPID_TSS const qpid::broker::ConnectionState* executionContext = 0;
+QPID_TSS(const qpid::broker::ConnectionState*, executionContext, 0);
 }
 
 void setManagementExecutionContext(const qpid::broker::ConnectionState* ctxt)

@@ -26,14 +26,52 @@
 
 #ifdef _WIN32
 #  ifdef _MSC_VER
-#    define QPID_TSS __declspec(thread)
+#    define QPID_TSS(type, name, default_value) __declspec(thread) type name = default_value
 #  else
-#    define QPID_TSS __thread
+#    define QPID_TSS(type, name, default_value) __thread type name = default_value
 #  endif
 #elif defined (__GNUC__)
-#  define QPID_TSS __thread
+#  ifdef __MACH__
+     #define QPID_TSS(type, name, default_value)							        \
+static pthread_once_t tls_##name##_once_control = PTHREAD_ONCE_INIT;		        \
+static pthread_key_t tls_##name##_key;						                        \
+static struct 									                                    \
+{										                                            \
+public:										                                        \
+  operator type& ()								                                    \
+  {										                                            \
+    return *GetType();								                                \
+  }										                                            \
+  void operator=(type value)							                            \
+  {										                                            \
+    (*GetType()) = value;							                                \
+  }										                                            \
+private:									                                        \
+  static void MakeKey()								                                \
+  {										                                            \
+    pthread_key_create(&tls_##name##_key, NULL);				                    \
+  }										                                            \
+  type* GetType()								                                    \
+  {										                                            \
+    type* value = NULL;								                                \
+    if (pthread_once(&tls_##name##_once_control, MakeKey) == 0)			            \
+    {										                                        \
+      value = reinterpret_cast < type * >(pthread_getspecific(tls_##name##_key));	\
+      if (value == NULL)							                                \
+      {										                                        \
+        value = reinterpret_cast < type * >(malloc(sizeof(type)));		            \
+        *value = default_value;                                                     \
+        pthread_setspecific(tls_##name##_key, value);				                \
+      }										                                        \
+    }										                                        \
+    return value;							                                    	\
+  }										                                            \
+} name
+#  else
+#    define QPID_TSS(type, name, default_value) __thread type name = default_value
+#  endif
 #elif defined (__SUNPRO_CC)
-#  define QPID_TSS __thread
+#  define QPID_TSS(type, name, default_value) __thread type name = default value
 #else
 #  error "Dont know how to define QPID_TSS for this platform"
 #endif

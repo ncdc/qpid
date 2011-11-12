@@ -456,29 +456,39 @@ AC_ARG_WITH([poller],
   epoll)
    AC_CHECK_HEADERS([sys/epoll.h],[poller=epoll],[AC_MSG_ERROR([Can't find epoll.h header file for epoll])])
    ;;
+  kqueue)
+   AC_CHECK_HEADERS([sys/event.h],[poller=kqueue],[AC_MSG_ERROR([Can't find event.h header file for kqueue])])
+   ;;
  esac],
  [
   AC_CHECK_HEADERS([sys/poll.h],[poller=no],)
   AC_CHECK_HEADERS([port.h],[poller=solaris-ecf],)
   AC_CHECK_HEADERS([sys/epoll.h],[poller=epoll],)
+  AC_CHECK_HEADERS([sys/event.h],[poller=kqueue],)
  ]
 )
 
 AM_CONDITIONAL([HAVE_ECF], [test x$poller = xsolaris-ecf])
 AM_CONDITIONAL([HAVE_EPOLL], [test x$poller = xepoll])
+AM_CONDITIONAL([HAVE_KQUEUE], [test x$poller = xkqueue])
 
 #Filter not implemented or invalid mechanisms
-if test $poller = xno; then
+if test x$poller = xno; then
   AC_MSG_ERROR([Polling mechanism not implemented for $host])
 fi
 
 #Guess host architecture, to choose platform-dependent objects
 case "$host" in
-     *sun-solaris*)
-        arch=solaris
-     ;;
+  *sun-solaris*)
+    arch=solaris
+    ;;
+  *darwin*)
+    arch=mac
+    ;;     
 esac
+
 AM_CONDITIONAL([SUNOS], [test x$arch = xsolaris])
+AM_CONDITIONAL([MAC], [test x$arch = xmac])
 
 # Check for some syslog capabilities not present in all systems
 AC_TRY_COMPILE([#include <sys/syslog.h>], 
@@ -488,6 +498,42 @@ AC_TRY_COMPILE([#include <sys/syslog.h>],
 AC_TRY_COMPILE([#include <sys/syslog.h>], 
                [int v = LOG_FTP;],
                [AC_DEFINE([HAVE_LOG_FTP], [1], [Set to 1 whether LOG_FTP is supported.])],)
+
+AC_TRY_COMPILE([#include <sasl/sasl.h>], 
+              [int v = SASL_PATH_TYPE_CONFIG;],
+              [AC_DEFINE([HAVE_SASL_PATH_TYPE_CONFIG], [1], [Set to 1 whether SASL_PATH_TYPE_CONFIG is supported.])],)
+
+AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [
+      #include <unistd.h>
+    ],
+    [
+      struct timespec ts;
+      clock_gettime(CLOCK_REALTIME, &ts);
+    ]
+  )],
+  [AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [Set to 1 whether clock_gettime is supported.])],
+)
+
+AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [
+      #include <mach/clock.h>
+      #include <mach/mach.h>
+    ],
+    [
+      clock_serv_t cclock;
+      mach_timespec_t mts;
+      host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+      clock_get_time(cclock, &mts);
+      mach_port_deallocate(mach_task_self(), cclock);
+    ]
+  )],
+  [AC_DEFINE([HAVE_MACH_CLOCK_GET_TIME], [1], [Set to 1 whether clock_get_time is supported.])],
+)
+
+#TODO error if no clock impl detected
 
 #Check if we need to include libacl to provide acl API
 gl_saved_libs=$LIBS

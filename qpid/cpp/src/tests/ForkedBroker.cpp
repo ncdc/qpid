@@ -113,8 +113,8 @@ void ForkedBroker::init(const Args& userArgs) {
     // This should really be neater (like only once not per fork)
     struct ::sigaction sa;
     sa.sa_handler = ignore_signal;
-    ::sigemptyset(&sa.sa_mask);
-    ::sigaddset(&sa.sa_mask, SIGCHLD);
+    sigemptyset(&sa.sa_mask);
+    sigaddset(&sa.sa_mask, SIGCHLD);
     sa.sa_flags = SA_NOCLDSTOP | SA_RESTART;
     ::sigaction(SIGCHLD, &sa, 0);
 

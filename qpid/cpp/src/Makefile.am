@@ -188,6 +188,10 @@ if HAVE_ECF
   poller = qpid/sys/solaris/ECFPoller.cpp
 endif
 
+if HAVE_KQUEUE
+  poller = qpid/sys/mac/KQueuePoller.cpp
+endif
+
 if SUNOS
   systeminfo = qpid/sys/solaris/SystemInfo.cpp
 else
@@ -323,11 +327,19 @@ EXTRA_DIST +=\
   qpid/amqp_0_10/UnknownStruct.cpp \
   qpid/store
 
+if MAC
+  UUID =
+  BOOST_SUFFIX = -mt
+else
+  BOOST_SUFFIX =
+  UUID = -luuid
+endif
+
 libqpidcommon_la_LIBADD = \
   libqpidtypes.la \
-  -lboost_program_options \
-  -lboost_filesystem \
-  -luuid \
+  -lboost_program_options$(BOOST_SUFFIX) \
+  -lboost_filesystem$(BOOST_SUFFIX) \
+  $(UUID) \
   $(LIB_DLOPEN) \
   $(LIB_CLOCK_GETTIME)
 
@@ -513,6 +525,10 @@ endif
 QPIDCOMMON_VERSION_INFO = 2:0:0
 libqpidcommon_la_LDFLAGS=-version-info $(QPIDCOMMON_VERSION_INFO)
 
+if MAC
+  libqpidcommon_la_LDFLAGS += -framework Foundation
+endif
+
 libqpidbroker_la_LIBADD = libqpidcommon.la
 libqpidbroker_la_SOURCES = \
   $(mgen_broker_cpp) \
@@ -692,7 +708,7 @@ libqpidbroker_la_SOURCES = \
 QPIDBROKER_VERSION_INFO = 2:0:0
 libqpidbroker_la_LDFLAGS = -version-info $(QPIDBROKER_VERSION_INFO)
 
-libqpidclient_la_LIBADD = libqpidcommon.la  -luuid
+libqpidclient_la_LIBADD = libqpidcommon.la $(UUID)
 
 libqpidclient_la_SOURCES =			\
   $(rgen_client_srcs)				\
@@ -752,7 +768,7 @@ libqpidclient_la_SOURCES =			\
 QPIDCLIENT_VERSION_INFO  = 2:0:0
 libqpidclient_la_LDFLAGS = -version-info $(QPIDCLIENT_VERSION_INFO)
 
-libqpidtypes_la_LIBADD= -luuid
+libqpidtypes_la_LIBADD= $(UUID)
 libqpidtypes_la_SOURCES=			\
   qpid/types/Exception.cpp			\
   qpid/types/Uuid.cpp				\

@@ -25,6 +25,12 @@
 #include <vector>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
+#include "qpid/sys/Thread.h"
+
+namespace {
+    static pthread_once_t tls_threadStatus_once_control = PTHREAD_ONCE_INIT;
+    static pthread_key_t tls_threadStatus_key;
+}
 
 namespace qpid {
 namespace sys {
@@ -85,7 +91,60 @@ public:
 private:
 
     static ThreadStatus*& getThreadStatus() {
-        static __thread ThreadStatus* threadStatus = 0;
+        //Q PID_TSS(ThreadStatus*, threadStatus, 0);
+        
+        static struct
+        {
+          operator ThreadStatus* & ()
+          {
+              // std::cout << "REF operator\n";
+            return *GetType();
+          }
+          void operator=(ThreadStatus* value)
+          {
+              // std::cout << "assignment operator\n";
+            (*GetType()) = value;
+          }
+        
+          static void MakeKey()
+          {
+              // std::cout << "MakeKey\n";
+            pthread_key_create(&tls_threadStatus_key, NULL);
+          }
+          ThreadStatus** GetType()
+          {
+              // std::cout << "GetType\n";
+            ThreadStatus** value = NULL;
+        
+            if (pthread_once(&tls_threadStatus_once_control, MakeKey) == 0)
+            {
+                // std::cout << "after pthread once\n";
+                void* foo = pthread_getspecific(tls_threadStatus_key);
+                if(foo == NULL) {
+                    // std::cout << "foo is NULL\n";
+                } else {
+                    // std::cout << "foo is NOT NULL\n";
+                }
+              value = reinterpret_cast < ThreadStatus* * >(foo);
+              // std::cout << "after reinterp\n";
+              if (value == NULL)
+              {
+                  // std::cout << "value is NULL\n";
+                value = reinterpret_cast < ThreadStatus* * >(malloc(sizeof(ThreadStatus*)));
+                // std::cout << "value malloc'd\n";
+                *value = 0;
+                // std::cout << "*value set to 0\n";
+                pthread_setspecific(tls_threadStatus_key, value);
+                // std::cout << "after setspecific\n";
+              }
+              // std::cout << "value is NOT NULL\n";
+            }
+            // std::cout << "returning value\n";
+            return value;
+          }
+        } threadStatus;
+        
+        
 
         // Thread local vars can't be dynamically constructed so we need
         // to check whether we've made it yet and construct it if not

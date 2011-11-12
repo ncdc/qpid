@@ -97,7 +97,7 @@ bool SaslAuthenticator::available(void) {
 void SaslAuthenticator::init(const std::string& saslName, std::string const & saslConfigPath )
 {
     //  Check if we have a version of SASL that supports sasl_set_path()
-#if (SASL_VERSION_FULL >= ((2<<16)|(1<<8)|22))
+#if (SASL_VERSION_FULL >= ((2<<16)|(1<<8)|22)) && defined(HAVE_SASL_PATH_TYPE_CONFIG)
     //  If we are not given a sasl path, do nothing and allow the default to be used.
     if ( saslConfigPath.empty() ) {
         QPID_LOG ( info, "SASL: no config path set - using default." );
@@ -128,6 +128,8 @@ void SaslAuthenticator::init(const std::string& saslName, std::string const & sa
 
         QPID_LOG(info, "SASL: config path set to " << saslConfigPath );
     }
+#else
+    QPID_LOG(warning, "SASL: your platform does not support sasl_set_path; ignoring " << saslConfigPath);
 #endif
 
     int code = sasl_server_init(NULL, saslName.c_str());
@@ -483,7 +485,7 @@ std::auto_ptr<SecurityLayer> CyrusAuthenticator::getSecurityLayer(uint16_t maxFr
     if (result != SASL_OK) {
         throw framing::InternalErrorException(QPID_MSG("SASL error: " << sasl_errdetail(sasl_conn)));
     }
-    uint ssf = *(reinterpret_cast<const unsigned*>(value));
+    unsigned ssf = *(reinterpret_cast<const unsigned*>(value));
     std::auto_ptr<SecurityLayer> securityLayer;
     if (ssf) {
         securityLayer = std::auto_ptr<SecurityLayer>(new CyrusSecurityLayer(sasl_conn, maxFrameSize));

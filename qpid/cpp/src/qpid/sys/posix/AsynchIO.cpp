@@ -26,6 +26,7 @@
 #include "qpid/sys/DispatchHandle.h"
 #include "qpid/sys/Time.h"
 #include "qpid/log/Statement.h"
+#include "qpid/sys/Thread.h"
 
 #include "qpid/sys/posix/check.h"
 
@@ -60,11 +61,11 @@ struct StaticInit {
  * recorded in each thread is about the same. If this turns out not to be the
  * case we could rebalance the info occasionally.  
  */
-__thread int threadReadTotal = 0;
-__thread int threadReadCount = 0;
-__thread int threadWriteTotal = 0;
-__thread int threadWriteCount = 0;
-__thread int64_t threadMaxIoTimeNs = 2 * 1000000; // start at 2ms
+QPID_TSS(int, threadReadTotal, 0);
+QPID_TSS(int, threadReadCount, 0);
+QPID_TSS(int, threadWriteTotal, 0);
+QPID_TSS(int, threadWriteCount, 0);
+QPID_TSS(int64_t, threadMaxIoTimeNs, 2 * 1000000); // start at 2ms
 }
 
 /*
@@ -438,7 +439,8 @@ void AsynchIO::readable(DispatchHandle& h) {
             int rc = socket.read(buff->bytes + buff->dataCount, readCount);
             if (rc > 0) {
                 buff->dataCount += rc;
-                threadReadTotal += rc;
+                threadReadTotal = threadReadTotal + rc;
+                readTotal += rc;
 
                 readCallback(*this, buff);
                 if (readingStopped) {
@@ -492,7 +494,7 @@ void AsynchIO::readable(DispatchHandle& h) {
         }
     } while (true);
 
-    ++threadReadCount;
+    threadReadCount = threadReadCount + 1;
     return;
 }
 
