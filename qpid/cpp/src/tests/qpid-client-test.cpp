@@ -44,7 +44,7 @@ namespace qpid {
 namespace tests {
 
 struct Args : public TestOptions {
-    uint msgSize;
+    uint32_t msgSize;
     bool verbose;
 
     Args() : TestOptions("Simple test of Qpid c++ client; sends and receives a single message."), msgSize(26)
@@ -57,13 +57,13 @@ struct Args : public TestOptions {
 
 const std::string chars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
-std::string generateData(uint size)
+std::string generateData(uint32_t size)
 {
     if (size < chars.length()) {
         return chars.substr(0, size);
     }
     std::string data;
-    for (uint i = 0; i < (size / chars.length()); i++) {
+    for (uint32_t i = 0; i < (size / chars.length()); i++) {
         data += chars;
     }
     data += chars.substr(0, size % chars.length());

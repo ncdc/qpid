@@ -46,15 +46,15 @@ namespace tests {
 typedef std::vector<std::string> StringSet;
 
 struct Args : public qpid::TestOptions {
-    uint size;
-    uint count;
-    uint rate;
+    uint32_t size;
+    uint32_t count;
+    uint32_t rate;
     bool sync;
-    uint reportFrequency;
-    uint timeLimit;
-    uint concurrentConnections;
-    uint prefetch;
-    uint ack;
+    uint32_t reportFrequency;
+    uint32_t timeLimit;
+    uint32_t concurrentConnections;
+    uint32_t prefetch;
+    uint32_t ack;
     bool cumulative;
     bool csv;
     bool durable;
@@ -104,7 +104,7 @@ uint64_t current_time()
 struct Stats
 {
     Mutex lock;
-    uint count;
+    uint32_t count;
     double minLatency;
     double maxLatency;
     double totalLatency;
@@ -137,7 +137,7 @@ public:
 class Receiver : public Client, public MessageListener
 {
     SubscriptionManager mgr;
-    uint count;
+    uint32_t count;
     Stats& stats;
 
 public:
@@ -145,14 +145,14 @@ public:
     void test();
     void received(Message& msg);
     Stats getStats();
-    uint getCount() { return count; }
+    uint32_t getCount() { return count; }
     void stop() {  mgr.stop(); mgr.cancel(queue); }
 };
 
 
 class Sender : public Client
 {
-    string generateData(uint size);
+    string generateData(uint32_t size);
     void sendByRate();
     void sendByCount();
     Receiver& receiver;
@@ -224,7 +224,7 @@ Client::~Client()
 Receiver::Receiver(const string& q, Stats& s) : Client(q), mgr(session), count(0), stats(s)
 {
     session.queueDeclare(arg::queue=queue, arg::durable=opts.durable, arg::autoDelete=true);
-    uint msgCount = session.queueQuery(arg::queue=queue).get().getMessageCount();
+    uint32_t msgCount = session.queueQuery(arg::queue=queue).get().getMessageCount();
     if (msgCount) {
         std::cout << "Warning: found " << msgCount << " msgs on " << queue << ". Purging..." << std::endl;
         session.queuePurge(arg::queue=queue);
@@ -274,7 +274,7 @@ Stats::Stats() : count(0), minLatency(std::numeric_limits<double>::max()), maxLa
 void Stats::print()
 {
     static bool already_have_stats = false;
-    uint value;
+    uint32_t value;
 
     if (opts.rate)
         value = opts.rate;
@@ -342,7 +342,7 @@ void Sender::sendByCount()
         msg.getDeliveryProperties().setDeliveryMode(framing::PERSISTENT);
     }
 
-    for (uint i = 0; i < opts.count; i++) {
+    for (uint32_t i = 0; i < opts.count; i++) {
         uint64_t sentAt(current_time());
         msg.getDeliveryProperties().setTimestamp(sentAt);
         async(session).messageTransfer(arg::content=msg, arg::acceptMode=1);
@@ -381,13 +381,13 @@ void Sender::sendByRate()
     }
 }
 
-string Sender::generateData(uint size)
+string Sender::generateData(uint32_t size)
 {
     if (size < chars.length()) {
         return chars.substr(0, size);
     }
     std::string data;
-    for (uint i = 0; i < (size / chars.length()); i++) {
+    for (uint32_t i = 0; i < (size / chars.length()); i++) {
         data += chars;
     }
     data += chars.substr(0, size % chars.length());
@@ -439,7 +439,7 @@ int main(int argc, char** argv)
         AsyncSession session;
 
         boost::ptr_vector<Test> tests(opts.concurrentConnections);
-        for (uint i = 0; i < opts.concurrentConnections; i++) {
+        for (uint32_t i = 0; i < opts.concurrentConnections; i++) {
             std::ostringstream out;
             out << opts.base << "-" << (i+1);
             tests.push_back(new Test(out.str()));

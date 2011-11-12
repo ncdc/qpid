@@ -41,12 +41,12 @@ struct Args : public qpid::Options
 {
     std::string url;
     std::string address;
-    uint size;
-    uint rate;
+    uint32_t size;
+    uint32_t rate;
     bool durable;
-    uint receiverCapacity;
-    uint senderCapacity;
-    uint ackFrequency;
+    uint32_t receiverCapacity;
+    uint32_t senderCapacity;
+    uint32_t ackFrequency;
 
     Args() :
         url("amqp:tcp:127.0.0.1:5672"),

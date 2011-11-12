@@ -60,10 +60,10 @@ using std::endl;
 struct DummyListener : public sys::Runnable, public MessageListener {
     std::vector<Message> messages;
     string name;
-    uint expected;
+    uint32_t expected;
     SubscriptionManager submgr;
 
-    DummyListener(Session& session, const string& n, uint ex) :
+    DummyListener(Session& session, const string& n, uint32_t ex) :
         name(n), expected(ex), submgr(session) {}
 
     void run()
@@ -93,7 +93,7 @@ struct SimpleListener : public MessageListener
         lock.notifyAll();
     }
 
-    void waitFor(const uint n)
+    void waitFor(const uint32_t n)
     {
         Monitor::ScopedLock l(lock);
         while (messages.size() < n) {
@@ -169,8 +169,8 @@ QPID_AUTO_TEST_CASE(testSendToSelf) {
     sys::Thread runner(fix.subs);//start dispatcher thread
     string data("msg");
     Message msg(data, "myq");
-    const uint count=10;
-    for (uint i = 0; i < count; ++i) {
+    const uint32_t count=10;
+    for (uint32_t i = 0; i < count; ++i) {
         fix.session.messageTransfer(arg::content=msg);
     }
     mylistener.waitFor(count);
@@ -179,7 +179,7 @@ QPID_AUTO_TEST_CASE(testSendToSelf) {
     runner.join();
     fix.session.close();
     BOOST_CHECK_EQUAL(mylistener.messages.size(), count);
-    for (uint j = 0; j < count; ++j) {
+    for (uint32_t j = 0; j < count; ++j) {
         BOOST_CHECK_EQUAL(mylistener.messages[j].getData(), data);
     }
 }
@@ -256,7 +256,7 @@ QPID_AUTO_TEST_CASE(testPeriodicExpiration) {
     args.setInt("qpid.max_count",10);
     fix.session.queueDeclare(arg::queue="my-queue", arg::exclusive=true, arg::autoDelete=true, arg::arguments=args);
 
-    for (uint i = 0; i < 10; i++) {
+    for (uint32_t i = 0; i < 10; i++) {
         Message m((boost::format("Message_%1%") % (i+1)).str(), "my-queue");
         if (i % 2) m.getDeliveryProperties().setTtl(500);
         fix.session.messageTransfer(arg::content=m);
@@ -272,7 +272,7 @@ QPID_AUTO_TEST_CASE(testExpirationOnPop) {
     ClientSessionFixture fix;
     fix.session.queueDeclare(arg::queue="my-queue", arg::exclusive=true, arg::autoDelete=true);
 
-    for (uint i = 0; i < 10; i++) {
+    for (uint32_t i = 0; i < 10; i++) {
         Message m((boost::format("Message_%1%") % (i+1)).str(), "my-queue");
         if (i % 2) m.getDeliveryProperties().setTtl(200);
         fix.session.messageTransfer(arg::content=m);
@@ -280,7 +280,7 @@ QPID_AUTO_TEST_CASE(testExpirationOnPop) {
 
     qpid::sys::usleep(300* 1000);
 
-    for (uint i = 0; i < 10; i++) {
+    for (uint32_t i = 0; i < 10; i++) {
         if (i % 2) continue;
         Message m;
         BOOST_CHECK(fix.subs.get(m, "my-queue", TIME_SEC));
@@ -291,8 +291,8 @@ QPID_AUTO_TEST_CASE(testExpirationOnPop) {
 QPID_AUTO_TEST_CASE(testRelease) {
     ClientSessionFixture fix;
 
-    const uint count=10;
-    for (uint i = 0; i < count; i++) {
+    const uint32_t count=10;
+    for (uint32_t i = 0; i < count; i++) {
         Message m((boost::format("Message_%1%") % (i+1)).str(), "my-queue");
         fix.session.messageTransfer(arg::content=m);
     }
@@ -307,7 +307,7 @@ QPID_AUTO_TEST_CASE(testRelease) {
     l1.waitFor(count);
     s1.cancel();
 
-    for (uint i = 0; i < count; i++) {
+    for (uint32_t i = 0; i < count; i++) {
         BOOST_CHECK_EQUAL((boost::format("Message_%1%") % (i+1)).str(), l1.messages[i].getData());
     }
     s1.release(s1.getUnaccepted());
@@ -317,7 +317,7 @@ QPID_AUTO_TEST_CASE(testRelease) {
     SimpleListener l2;
     Subscription s2 = fix.subs.subscribe(l2, "my-queue", settings);
     l2.waitFor(count);
-    for (uint i = 0; i < count; i++) {
+    for (uint32_t i = 0; i < count; i++) {
         BOOST_CHECK_EQUAL((boost::format("Message_%1%") % (i+1)).str(), l2.messages[i].getData());
     }
 
@@ -328,9 +328,9 @@ QPID_AUTO_TEST_CASE(testRelease) {
 
 QPID_AUTO_TEST_CASE(testCompleteOnAccept) {
     ClientSessionFixture fix;
-    const uint count = 8;
-    const uint chunk = 4;
-    for (uint i = 0; i < count; i++) {
+    const uint32_t count = 8;
+    const uint32_t chunk = 4;
+    for (uint32_t i = 0; i < count; i++) {
         Message m((boost::format("Message_%1%") % (i+1)).str(), "my-queue");
         fix.session.messageTransfer(arg::content=m);
     }
@@ -344,7 +344,7 @@ QPID_AUTO_TEST_CASE(testCompleteOnAccept) {
     Subscription s = fix.subs.subscribe(q, "my-queue", settings);
     fix.session.messageFlush(arg::destination=s.getName());
     SequenceSet accepted;
-    for (uint i = 0; i < chunk; i++) {
+    for (uint32_t i = 0; i < chunk; i++) {
         Message m;
         BOOST_CHECK(q.get(m));
         BOOST_CHECK_EQUAL((boost::format("Message_%1%") % (i+1)).str(), m.getData());
@@ -357,7 +357,7 @@ QPID_AUTO_TEST_CASE(testCompleteOnAccept) {
     fix.session.messageFlush(arg::destination=s.getName());
     accepted.clear();
 
-    for (uint i = chunk; i < count; i++) {
+    for (uint32_t i = chunk; i < count; i++) {
         Message m;
         BOOST_CHECK(q.get(m));
         BOOST_CHECK_EQUAL((boost::format("Message_%1%") % (i+1)).str(), m.getData());
@@ -372,10 +372,10 @@ struct Publisher : qpid::sys::Runnable
 {
     AsyncSession session;
     Message message;
-    uint count;
+    uint32_t count;
     Thread thread;
 
-    Publisher(Connection& con, Message m, uint c) : session(con.newSession()), message(m), count(c) {}
+    Publisher(Connection& con, Message m, uint32_t c) : session(con.newSession()), message(m), count(c) {}
 
     void start()
     {
@@ -389,7 +389,7 @@ struct Publisher : qpid::sys::Runnable
 
     void run()
     {
-        for (uint i = 0; i < count; i++) {
+        for (uint32_t i = 0; i < count; i++) {
             session.messageTransfer(arg::content=message);
         }
         session.sync();

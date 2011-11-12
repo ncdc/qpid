@@ -54,21 +54,21 @@ class PriorityQueue : public Messages
 
     void foreach(Functor);
     void removeIf(Predicate);
-    static uint getPriority(const QueuedMessage&);
+    static uint8_t getPriority(const QueuedMessage&);
   protected:
     typedef std::deque<QueuedMessage> Deque;
     typedef std::vector<Deque> PriorityLevels;
-    virtual bool findFrontLevel(uint& p, PriorityLevels&);
+    virtual bool findFrontLevel(uint8_t& p, PriorityLevels&);
 
     const int levels;
   private:
     PriorityLevels messages;
-    uint frontLevel;
+    uint8_t frontLevel;
     bool haveFront;
     bool cached;
     
     bool find(const framing::SequenceNumber&, QueuedMessage&, bool remove);
-    uint getPriorityLevel(const QueuedMessage&) const;
+    uint8_t getPriorityLevel(const QueuedMessage&) const;
     void clearCache();
     bool checkFront();
 };

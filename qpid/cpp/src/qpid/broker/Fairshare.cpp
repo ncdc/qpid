@@ -29,23 +29,23 @@
 namespace qpid {
 namespace broker {
 
-Fairshare::Fairshare(size_t levels, uint limit) :
+Fairshare::Fairshare(size_t levels, uint32_t limit) :
     PriorityQueue(levels),
     limits(levels, limit), priority(levels-1), count(0) {}
 
 
-void Fairshare::setLimit(size_t level, uint limit)
+void Fairshare::setLimit(size_t level, uint32_t limit)
 {
     limits[level] = limit;
 }
 
 bool Fairshare::limitReached()
 {
-    uint l = limits[priority];
+    uint32_t l = limits[priority];
     return l && ++count > l;
 }
 
-uint Fairshare::currentLevel()
+uint8_t Fairshare::currentLevel()
 {
     if (limitReached()) {
         return nextLevel();
@@ -54,7 +54,7 @@ uint Fairshare::currentLevel()
     }
 }
 
-uint Fairshare::nextLevel()
+uint8_t Fairshare::nextLevel()
 {
     count = 1;
     if (priority) --priority;
@@ -68,23 +68,23 @@ bool Fairshare::isNull()
     return true;
 }
 
-bool Fairshare::getState(uint& p, uint& c) const
+bool Fairshare::getState(uint8_t& p, uint32_t& c) const
 {
     p = priority;
     c = count;
     return true;
 }
 
-bool Fairshare::setState(uint p, uint c)
+bool Fairshare::setState(uint8_t p, uint32_t c)
 {
     priority = p;
     count = c;
     return true;
 }
 
-bool Fairshare::findFrontLevel(uint& p, PriorityLevels& messages)
+bool Fairshare::findFrontLevel(uint8_t& p, PriorityLevels& messages)
 {
-    const uint start = p = currentLevel();
+    const uint8_t start = p = currentLevel();
     do {
         if (!messages[p].empty()) return true;
     } while ((p = nextLevel()) != start);
@@ -93,13 +93,13 @@ bool Fairshare::findFrontLevel(uint& p, PriorityLevels& messages)
 
 
 
-bool Fairshare::getState(const Messages& m, uint& priority, uint& count)
+bool Fairshare::getState(const Messages& m, uint8_t& priority, uint32_t& count)
 {
     const Fairshare* fairshare = dynamic_cast<const Fairshare*>(&m);
     return fairshare && fairshare->getState(priority, count);
 }
 
-bool Fairshare::setState(Messages& m, uint priority, uint count)
+bool Fairshare::setState(Messages& m, uint8_t priority, uint32_t count)
 {
     Fairshare* fairshare = dynamic_cast<Fairshare*>(&m);
     return fairshare && fairshare->setState(priority, count);
@@ -141,11 +141,11 @@ int getSetting(const qpid::framing::FieldTable& settings, const std::vector<std:
     return std::max(minvalue,std::min(getIntegerSetting(settings, keys), maxvalue));
 }
 
-std::auto_ptr<Fairshare> getFairshareForKey(const qpid::framing::FieldTable& settings, uint levels, const std::string& key)
+std::auto_ptr<Fairshare> getFairshareForKey(const qpid::framing::FieldTable& settings, uint8_t levels, const std::string& key)
 {
-    uint defaultLimit = getIntegerSettingForKey(settings, key);
+    uint8_t defaultLimit = getIntegerSettingForKey(settings, key);
     std::auto_ptr<Fairshare> fairshare(new Fairshare(levels, defaultLimit));
-    for (uint i = 0; i < levels; i++) {
+    for (uint8_t i = 0; i < levels; i++) {
         std::string levelKey = (boost::format("%1%-%2%") % key % i).str();
         if(settings.isSet(levelKey)) {
             fairshare->setLimit(i, getIntegerSettingForKey(settings, levelKey));
@@ -159,7 +159,7 @@ std::auto_ptr<Fairshare> getFairshareForKey(const qpid::framing::FieldTable& set
 }
 
 std::auto_ptr<Fairshare> getFairshare(const qpid::framing::FieldTable& settings,
-                                      uint levels,
+                                      uint8_t levels,
                                       const std::vector<std::string>& keys)
 {
     std::auto_ptr<Fairshare> fairshare;

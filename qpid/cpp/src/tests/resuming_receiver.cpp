@@ -52,11 +52,11 @@ class Listener : public MessageListener,
     void editUrlList(vector<Url>& urls);
   private:
     Subscription subscription;
-    uint count;
+    uint32_t count;
     vector<int> received_twice;
-    uint lastSn;
+    uint32_t lastSn;
     bool gaps;
-    uint  reportFrequency;
+    uint32_t  reportFrequency;
     int  verbosity;
     bool done;
     string queueName;
@@ -109,7 +109,7 @@ void Listener::received(Message & message)
                         << endl;
         }
     } else {
-        uint sn = message.getHeaders().getAsInt(SN);
+        uint32_t sn = message.getHeaders().getAsInt(SN);
         if (lastSn < sn) {
             if (sn - lastSn > 1) {
                 cerr << "Error: gap in sequence between " << lastSn << " and " << sn << endl;

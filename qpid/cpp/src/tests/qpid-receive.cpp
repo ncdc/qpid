@@ -51,22 +51,22 @@ struct Options : public qpid::Options
     std::string connectionOptions;
     int64_t timeout;
     bool forever;
-    uint messages;
+    uint32_t messages;
     bool ignoreDuplicates;
     bool checkRedelivered;
-    uint capacity;
-    uint ackFrequency;
-    uint tx;
-    uint rollbackFrequency;
+    uint32_t capacity;
+    uint32_t ackFrequency;
+    uint32_t tx;
+    uint32_t rollbackFrequency;
     bool printContent;
     bool printHeaders;
     bool failoverUpdates;
     qpid::log::Options log;
     bool reportTotal;
-    uint reportEvery;
+    uint32_t reportEvery;
     bool reportHeader;
     string readyAddress;
-    uint receiveRate;
+    uint32_t receiveRate;
 
     Options(const std::string& argv0=std::string())
         : qpid::Options("Options"),
@@ -147,13 +147,13 @@ const string SN("sn");
 
 class SequenceTracker
 {
-    uint lastSn;
+    uint32_t lastSn;
   public:
     SequenceTracker() : lastSn(0) {}
 
     bool isDuplicate(Message& message)
     {
-        uint sn = message.getProperties()[SN];
+        uint32_t sn = message.getProperties()[SN];
         if (lastSn < sn) {
             lastSn = sn;
             return false;
@@ -180,8 +180,8 @@ int main(int argc, char ** argv)
             Receiver receiver = session.createReceiver(opts.address);
             receiver.setCapacity(opts.capacity);
             Message msg;
-            uint count = 0;
-            uint txCount = 0;
+            uint32_t count = 0;
+            uint32_t txCount = 0;
             SequenceTracker sequenceTracker;
             Duration timeout = opts.getTimeout();
             bool done = false;

@@ -42,8 +42,8 @@ namespace tests {
 typedef vector<string> StringSet;
 
 struct Args : public qpid::TestOptions {
-    uint size;
-    uint count;
+    uint32_t size;
+    uint32_t count;
     bool durable;
     string destination;
     string routingKey;
@@ -90,7 +90,7 @@ struct Client
         if (opts.durable)
             msg.getDeliveryProperties().setDeliveryMode(framing::PERSISTENT);
 
-        for (uint i = 0; i < opts.count; i++) {
+        for (uint32_t i = 0; i < opts.count; i++) {
             if (opts.id) {
                 hex(i+1, correlationId);
                 msg.getMessageProperties().setCorrelationId(correlationId);

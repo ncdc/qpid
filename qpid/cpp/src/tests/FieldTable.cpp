@@ -128,7 +128,7 @@ QPID_AUTO_TEST_CASE(testNestedValues)
         a.getArray("C", c);
         std::vector<std::string> items;
         c.collect(items);
-        BOOST_CHECK((uint) 2 == items.size());
+        BOOST_CHECK((uint32_t) 2 == items.size());
         BOOST_CHECK(string("one") == items[0]);
         BOOST_CHECK(string("two") == items[1]);
 

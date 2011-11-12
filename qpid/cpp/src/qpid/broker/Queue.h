@@ -73,7 +73,7 @@ class Queue : public boost::enable_shared_from_this<Queue>,
     struct UsageBarrier
     {
         Queue& parent;
-        uint count;
+        uint32_t count;
 
         UsageBarrier(Queue&);
         bool acquire();

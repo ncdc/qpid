@@ -52,24 +52,24 @@ struct Options : public qpid::Options
     std::string url;
     std::string address;
     std::string connectionOptions;
-    uint messages;
-    uint capacity;
-    uint ackFrequency;
+    uint32_t messages;
+    uint32_t capacity;
+    uint32_t ackFrequency;
     bool failoverUpdates;
     qpid::log::Options log;
-    uint senders;
-    uint receivers;
-    uint groupSize;
+    uint32_t senders;
+    uint32_t receivers;
+    uint32_t groupSize;
     bool printReport;
     std::string groupKey;
     bool durable;
     bool allowDuplicates;
     bool randomizeSize;
     bool stickyConsumer;
-    uint timeout;
-    uint interleave;
+    uint32_t timeout;
+    uint32_t interleave;
     std::string prefix;
-    uint sendRate;
+    uint32_t sendRate;
 
     Options(const std::string& argv0=std::string())
         : qpid::Options("Options"),
@@ -154,26 +154,26 @@ class GroupChecker
 {
     qpid::sys::Mutex lock;
 
-    uint consumerCt;
-    uint producerCt;
-    uint totalMsgs;
-    uint totalMsgsConsumed;
-    uint totalMsgsPublished;
+    uint32_t consumerCt;
+    uint32_t producerCt;
+    uint32_t totalMsgs;
+    uint32_t totalMsgsConsumed;
+    uint32_t totalMsgsPublished;
     bool allowDuplicates;
-    uint duplicateMsgs;
+    uint32_t duplicateMsgs;
 
-    typedef std::map<std::string, uint> SequenceMap;
+    typedef std::map<std::string, uint32_t> SequenceMap;
     SequenceMap sequenceMap;
 
     // Statistics - for each group, store the names of all clients that consumed messages
     // from that group, and the number of messages consumed per client.
-    typedef std::map<std::string, uint> ClientCounter;
+    typedef std::map<std::string, uint32_t> ClientCounter;
     typedef std::map<std::string, ClientCounter> GroupStatistics;
     GroupStatistics statistics;
 
 public:
 
-    GroupChecker( uint messages, uint consumers, uint producers, bool d) :
+    GroupChecker( uint32_t messages, uint32_t consumers, uint32_t producers, bool d) :
         consumerCt(consumers), producerCt(producers),
         totalMsgs(0), totalMsgsConsumed(0), totalMsgsPublished(0), allowDuplicates(d),
         duplicateMsgs(0)
@@ -187,7 +187,7 @@ public:
     }
 
     bool checkSequence( const std::string& groupId,
-                        uint sequence, const std::string& client )
+                        uint32_t sequence, const std::string& client )
     {
         qpid::sys::Mutex::ScopedLock l(lock);
 
@@ -217,7 +217,7 @@ public:
     }
 
     void sendingSequence( const std::string& groupId,
-                          uint sequence, bool eos,
+                          uint32_t sequence, bool eos,
                           const std::string& client )
     {
         qpid::sys::Mutex::ScopedLock l(lock);
@@ -234,7 +234,7 @@ public:
         return sequenceMap.erase( groupId ) == 1;
     }
 
-    uint getNextExpectedSequence( const std::string& groupId )
+    uint32_t getNextExpectedSequence( const std::string& groupId )
     {
         qpid::sys::Mutex::ScopedLock l(lock);
         return sequenceMap[groupId];
@@ -253,18 +253,18 @@ public:
                 (totalMsgsConsumed >= totalMsgs && sequenceMap.size() == 0));
     }
 
-    uint getTotalMessages()
+    uint32_t getTotalMessages()
     {
         return totalMsgs;
     }
 
-    uint getConsumedTotal()
+    uint32_t getConsumedTotal()
     {
         qpid::sys::Mutex::ScopedLock l(lock);
         return totalMsgsConsumed;
     }
 
-    uint getPublishedTotal()
+    uint32_t getPublishedTotal()
     {
         qpid::sys::Mutex::ScopedLock l(lock);
         return totalMsgsPublished;
@@ -301,7 +301,7 @@ namespace {
     class Randomizer {
         qpid::sys::Mutex lock;
     public:
-        uint operator()(uint max) {
+        uint32_t operator()(uint32_t max) {
             qpid::sys::Mutex::ScopedLock l(lock);
             return (rand() % max) + 1;
         }
@@ -316,18 +316,18 @@ namespace {
 class GroupGenerator {
 
     const std::string groupPrefix;
-    const uint groupSize;
+    const uint32_t groupSize;
     const bool randomizeSize;
-    const uint interleave;
+    const uint32_t interleave;
 
-    uint groupSuffix;
-    uint total;
+    uint32_t groupSuffix;
+    uint32_t total;
 
     struct GroupState {
         std::string id;
-        const uint size;
-        uint count;
-        GroupState( const std::string& i, const uint s )
+        const uint32_t size;
+        uint32_t count;
+        GroupState( const std::string& i, const uint32_t s )
             : id(i), size(s), count(0) {}
     };
     typedef std::list<GroupState> GroupList;
@@ -338,7 +338,7 @@ class GroupGenerator {
     void newGroup() {
         std::ostringstream groupId(groupPrefix, ios_base::out|ios_base::ate);
         groupId << std::string(":") << groupSuffix++;
-        uint size = (randomizeSize) ? randomizer(groupSize) : groupSize;
+        uint32_t size = (randomizeSize) ? randomizer(groupSize) : groupSize;
         QPID_LOG(trace, "New group: GROUPID=[" << groupId.str() << "] size=" << size << " this=" << this);
         GroupState group( groupId.str(), size );
         groups.push_back( group );
@@ -346,21 +346,21 @@ class GroupGenerator {
 
 public:
     GroupGenerator( const std::string& prefix,
-                    const uint t,
-                    const uint size,
+                    const uint32_t t,
+                    const uint32_t size,
                     const bool randomize,
-                    const uint i)
+                    const uint32_t i)
         : groupPrefix(prefix), groupSize(size),
           randomizeSize(randomize), interleave(i), groupSuffix(0), total(t)
     {
         QPID_LOG(trace, "New group generator: PREFIX=[" << prefix << "] total=" << total << " size=" << size << " rand=" << randomize << " interleave=" << interleave << " this=" << this);
-        for (uint i = 0; i < 1 || i < interleave; ++i) {
+        for (uint32_t i = 0; i < 1 || i < interleave; ++i) {
             newGroup();
         }
         current = groups.begin();
     }
 
-    bool genGroup(std::string& groupId, uint& seq, bool& eos)
+    bool genGroup(std::string& groupId, uint32_t& seq, bool& eos)
     {
         if (!total) return false;
         --total;
@@ -430,13 +430,13 @@ public:
             Receiver receiver = session.createReceiver(opts.address);
             receiver.setCapacity(opts.capacity);
             Message msg;
-            uint count = 0;
+            uint32_t count = 0;
 
             while (!stopped) {
                 if (receiver.fetch(msg, Duration::SECOND)) { // msg retrieved
                     qpid::types::Variant::Map& properties = msg.getProperties();
                     std::string groupId = properties[opts.groupKey];
-                    uint groupSeq = properties[SN];
+                    uint32_t groupSeq = properties[SN];
                     bool eof = properties[EOS];
 
                     QPID_LOG(trace, "RECVING GROUPID=[" << groupId << "] seq=" << groupSeq << " eos=" << eof << " name=" << name);
@@ -507,9 +507,9 @@ public:
             Message msg;
             msg.setDurable(opts.durable);
             std::string groupId;
-            uint seq;
+            uint32_t seq;
             bool eos;
-            uint sent = 0;
+            uint32_t sent = 0;
 
             qpid::sys::AbsTime start = qpid::sys::now();
             int64_t interval = 0;
@@ -579,10 +579,10 @@ int main(int argc, char ** argv)
             }
 
             // wait for all pubs/subs to finish.... or for consumers to fail or stall.
-            uint stalledTime = 0;
+            uint32_t stalledTime = 0;
             bool clientFailed = false;
             while (!clientFailed && (!state.allMsgsPublished() || !state.allMsgsConsumed())) {
-                uint lastCount;
+                uint32_t lastCount;
 
                 lastCount = state.getConsumedTotal();
                 qpid::sys::usleep( 1000000 );

@@ -36,7 +36,7 @@ class ReplayBufferChecker
 {
   public:
 
-    ReplayBufferChecker(uint from, uint to) : end(to), i(from) {}
+    ReplayBufferChecker(uint32_t from, uint32_t to) : end(to), i(from) {}
 
     void operator()(const Message& m)
     {
@@ -44,8 +44,8 @@ class ReplayBufferChecker
         BOOST_CHECK_EQUAL((boost::format("Message_%1%") % (i++)).str(), m.getData());
     }
   private:
-    const uint end;
-    uint i;
+    const uint32_t end;
+    uint32_t i;
 
 };
 
@@ -56,7 +56,7 @@ QPID_AUTO_TEST_CASE(testReplay)
 
     MessageReplayTracker tracker(10);
     tracker.init(fix.session);
-    for (uint i = 0; i < 5; i++) {
+    for (uint32_t i = 0; i < 5; i++) {
         Message message((boost::format("Message_%1%") % (i+1)).str(), "my-queue");
         tracker.send(message);
     }
@@ -64,8 +64,8 @@ QPID_AUTO_TEST_CASE(testReplay)
     tracker.foreach(checker);
 
     tracker.replay(fix.session);
-    for (uint j = 0; j < 2; j++) {//each message should have been sent twice
-        for (uint i = 0; i < 5; i++) {
+    for (uint32_t j = 0; j < 2; j++) {//each message should have been sent twice
+        for (uint32_t i = 0; i < 5; i++) {
             Message m;
             BOOST_CHECK(fix.subs.get(m, "my-queue", TIME_SEC));
             BOOST_CHECK_EQUAL((boost::format("Message_%1%") % (i+1)).str(), m.getData());
@@ -82,7 +82,7 @@ QPID_AUTO_TEST_CASE(testCheckCompletion)
 
     MessageReplayTracker tracker(10);
     tracker.init(fix.session);
-    for (uint i = 0; i < 5; i++) {
+    for (uint32_t i = 0; i < 5; i++) {
         Message message((boost::format("Message_%1%") % (i+1)).str(), "my-queue");
         tracker.send(message);
     }
@@ -90,7 +90,7 @@ QPID_AUTO_TEST_CASE(testCheckCompletion)
     tracker.checkCompletion();
     tracker.replay(fix.session);
     Message received;
-    for (uint i = 0; i < 5; i++) {
+    for (uint32_t i = 0; i < 5; i++) {
         BOOST_CHECK(fix.subs.get(received, "my-queue"));
         BOOST_CHECK_EQUAL((boost::format("Message_%1%") % (i+1)).str(), received.getData());
     }

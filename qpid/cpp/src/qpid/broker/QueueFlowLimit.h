@@ -56,8 +56,8 @@ class Broker;
  class QueueFlowLimit : public StatefulQueueObserver
 {
     static uint64_t defaultMaxSize;
-    static uint defaultFlowStopRatio;
-    static uint defaultFlowResumeRatio;
+    static uint8_t defaultFlowStopRatio;
+    static uint8_t defaultFlowResumeRatio;
 
     Queue *queue;
     std::string queueName;
@@ -107,7 +107,7 @@ class Broker;
     uint32_t encodedSize() const;
 
     static QPID_BROKER_EXTERN void observe(Queue& queue, const qpid::framing::FieldTable& settings);
-    static QPID_BROKER_EXTERN void setDefaults(uint64_t defaultMaxSize, uint defaultFlowStopRatio, uint defaultFlowResumeRatio);
+    static QPID_BROKER_EXTERN void setDefaults(uint64_t defaultMaxSize, uint8_t defaultFlowStopRatio, uint8_t defaultFlowResumeRatio);
 
     friend QPID_BROKER_EXTERN std::ostream& operator<<(std::ostream&, const QueueFlowLimit&);
 

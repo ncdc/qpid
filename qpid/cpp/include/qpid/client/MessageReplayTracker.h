@@ -37,12 +37,12 @@ namespace client {
 class QPID_CLIENT_CLASS_EXTERN MessageReplayTracker
 {
   public:
-    QPID_CLIENT_EXTERN MessageReplayTracker(uint flushInterval);
+    QPID_CLIENT_EXTERN MessageReplayTracker(uint32_t flushInterval);
     QPID_CLIENT_EXTERN void send(const Message& message, const std::string& destination = "");
     QPID_CLIENT_EXTERN void init(AsyncSession session);
     QPID_CLIENT_EXTERN void replay(AsyncSession session);
-    QPID_CLIENT_EXTERN void setFlushInterval(uint interval);
-    QPID_CLIENT_EXTERN uint getFlushInterval();
+    QPID_CLIENT_EXTERN void setFlushInterval(uint32_t interval);
+    QPID_CLIENT_EXTERN uint32_t getFlushInterval();
     QPID_CLIENT_EXTERN void checkCompletion();
 
     template <class F> void foreach(F& f) {
@@ -64,8 +64,8 @@ class QPID_CLIENT_CLASS_EXTERN MessageReplayTracker
     };
 
     AsyncSession session;
-    uint flushInterval;
-    uint count;
+    uint32_t flushInterval;
+    uint32_t count;
     std::list<ReplayRecord> buffer;
 };
 }} // namespace qpid::client

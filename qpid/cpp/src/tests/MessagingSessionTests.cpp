@@ -81,14 +81,14 @@ QPID_AUTO_TEST_CASE(testSendReceiveHeaders)
     QueueFixture fix;
     Sender sender = fix.session.createSender(fix.queue);
     Message out("test-message");
-    for (uint i = 0; i < 10; ++i) {
+    for (uint32_t i = 0; i < 10; ++i) {
         out.getProperties()["a"] = i;
         out.setProperty("b", i + 100);
         sender.send(out);
     }
     Receiver receiver = fix.session.createReceiver(fix.queue);
     Message in;
-    for (uint i = 0; i < 10; ++i) {
+    for (uint32_t i = 0; i < 10; ++i) {
         BOOST_CHECK(receiver.fetch(in, Duration::SECOND * 5));
         BOOST_CHECK_EQUAL(in.getContent(), out.getContent());
         BOOST_CHECK_EQUAL(in.getProperties()["a"].asUint32(), i);
@@ -154,18 +154,18 @@ QPID_AUTO_TEST_CASE(testNextReceiver)
 {
     MultiQueueFixture fix;
 
-    for (uint i = 0; i < fix.queues.size(); i++) {
+    for (uint32_t i = 0; i < fix.queues.size(); i++) {
         Receiver r = fix.session.createReceiver(fix.queues[i]);
         r.setCapacity(10u);
     }
 
-    for (uint i = 0; i < fix.queues.size(); i++) {
+    for (uint32_t i = 0; i < fix.queues.size(); i++) {
         Sender s = fix.session.createSender(fix.queues[i]);
         Message msg((boost::format("Message_%1%") % (i+1)).str());
         s.send(msg);
     }
 
-    for (uint i = 0; i < fix.queues.size(); i++) {
+    for (uint32_t i = 0; i < fix.queues.size(); i++) {
         Message msg;
         BOOST_CHECK(fix.session.nextReceiver().fetch(msg, Duration::SECOND));
         BOOST_CHECK_EQUAL(msg.getContent(), (boost::format("Message_%1%") % (i+1)).str());
@@ -318,14 +318,14 @@ QPID_AUTO_TEST_CASE(testAvailable)
     Sender s1 = fix.session.createSender(fix.queues[0]);
     Sender s2 = fix.session.createSender(fix.queues[1]);
 
-    for (uint i = 0; i < 10; ++i) {
+    for (uint32_t i = 0; i < 10; ++i) {
         s1.send(Message((boost::format("A_%1%") % (i+1)).str()));
     }
-    for (uint i = 0; i < 5; ++i) {
+    for (uint32_t i = 0; i < 5; ++i) {
         s2.send(Message((boost::format("B_%1%") % (i+1)).str()));
     }
     qpid::sys::sleep(1);//is there any avoid an arbitrary sleep while waiting for messages to be dispatched?
-    for (uint i = 0; i < 5; ++i) {
+    for (uint32_t i = 0; i < 5; ++i) {
         BOOST_CHECK_EQUAL(fix.session.getReceivable(), 15u - 2*i);
         BOOST_CHECK_EQUAL(r1.getAvailable(), 10u - i);
         BOOST_CHECK_EQUAL(r1.fetch().getContent(), (boost::format("A_%1%") % (i+1)).str());
@@ -333,7 +333,7 @@ QPID_AUTO_TEST_CASE(testAvailable)
         BOOST_CHECK_EQUAL(r2.fetch().getContent(), (boost::format("B_%1%") % (i+1)).str());
         fix.session.acknowledge();
     }
-    for (uint i = 5; i < 10; ++i) {
+    for (uint32_t i = 5; i < 10; ++i) {
         BOOST_CHECK_EQUAL(fix.session.getReceivable(), 10u - i);
         BOOST_CHECK_EQUAL(r1.getAvailable(), 10u - i);
         BOOST_CHECK_EQUAL(r1.fetch().getContent(), (boost::format("A_%1%") % (i+1)).str());
@@ -344,11 +344,11 @@ QPID_AUTO_TEST_CASE(testUnsettledAcks)
 {
     QueueFixture fix;
     Sender sender = fix.session.createSender(fix.queue);
-    for (uint i = 0; i < 10; ++i) {
+    for (uint32_t i = 0; i < 10; ++i) {
         sender.send(Message((boost::format("Message_%1%") % (i+1)).str()));
     }
     Receiver receiver = fix.session.createReceiver(fix.queue);
-    for (uint i = 0; i < 10; ++i) {
+    for (uint32_t i = 0; i < 10; ++i) {
         BOOST_CHECK_EQUAL(receiver.fetch().getContent(), (boost::format("Message_%1%") % (i+1)).str());
     }
     BOOST_CHECK_EQUAL(fix.session.getUnsettledAcks(), 0u);
@@ -816,7 +816,7 @@ QPID_AUTO_TEST_CASE(testExclusiveQueueSubscriberAndBrowser)
 QPID_AUTO_TEST_CASE(testDeleteQueueWithUnackedMessages)
 {
     MessagingFixture fix;
-    const uint capacity = 5;
+    const uint32_t capacity = 5;
 
     Sender sender = fix.session.createSender("test.ex;{create:always,node:{type:topic}}");
 	Receiver receiver2 = fix.session.createReceiver("alternate.ex;{create:always,node:{type:topic}}");
@@ -826,7 +826,7 @@ QPID_AUTO_TEST_CASE(testDeleteQueueWithUnackedMessages)
 	receiver2.setCapacity(capacity*2);
 
     Message out("test-message");
-    for (uint i = 0; i < capacity*2; ++i) {
+    for (uint32_t i = 0; i < capacity*2; ++i) {
         sender.send(out);
     }
 
@@ -835,7 +835,7 @@ QPID_AUTO_TEST_CASE(testDeleteQueueWithUnackedMessages)
     // Make sure all pending messages were sent to the alternate
     // exchange when the queue was deleted.
     Message in;
-    for (uint i = 0; i < capacity*2; ++i) {
+    for (uint32_t i = 0; i < capacity*2; ++i) {
         in = receiver2.fetch(Duration::SECOND * 5);
         BOOST_CHECK_EQUAL(in.getContent(), out.getContent());
     }
@@ -865,21 +865,21 @@ QPID_AUTO_TEST_CASE(testAcknowledge)
 {
     QueueFixture fix;
     Sender sender = fix.session.createSender(fix.queue);
-    const uint count(20);
-    for (uint i = 0; i < count; ++i) {
+    const uint32_t count(20);
+    for (uint32_t i = 0; i < count; ++i) {
         sender.send(Message((boost::format("Message_%1%") % (i+1)).str()));
     }
 
     Session other = fix.connection.createSession();
     Receiver receiver = other.createReceiver(fix.queue);
     std::vector<Message> messages;
-    for (uint i = 0; i < count; ++i) {
+    for (uint32_t i = 0; i < count; ++i) {
         Message msg = receiver.fetch();
         BOOST_CHECK_EQUAL(msg.getContent(), (boost::format("Message_%1%") % (i+1)).str());
         messages.push_back(msg);
     }
-    const uint batch(10); //acknowledge first 10 messages only
-    for (uint i = 0; i < batch; ++i) {
+    const uint32_t batch(10); //acknowledge first 10 messages only
+    for (uint32_t i = 0; i < batch; ++i) {
         other.acknowledge(messages[i]);
     }
     messages.clear();
@@ -888,7 +888,7 @@ QPID_AUTO_TEST_CASE(testAcknowledge)
 
     other = fix.connection.createSession();
     receiver = other.createReceiver(fix.queue);
-    for (uint i = 0; i < (count-batch); ++i) {
+    for (uint32_t i = 0; i < (count-batch); ++i) {
         Message msg = receiver.fetch();
         BOOST_CHECK_EQUAL(msg.getContent(), (boost::format("Message_%1%") % (i+1+batch)).str());
         if (i % 2) other.acknowledge(msg); //acknowledge every other message
@@ -899,7 +899,7 @@ QPID_AUTO_TEST_CASE(testAcknowledge)
     //check unacknowledged messages are still enqueued
     other = fix.connection.createSession();
     receiver = other.createReceiver(fix.queue);
-    for (uint i = 0; i < ((count-batch)/2); ++i) {
+    for (uint32_t i = 0; i < ((count-batch)/2); ++i) {
         Message msg = receiver.fetch();
         BOOST_CHECK_EQUAL(msg.getContent(), (boost::format("Message_%1%") % ((i*2)+1+batch)).str());
     }
@@ -966,14 +966,14 @@ QPID_AUTO_TEST_CASE(testRejectAndCredit)
     Sender sender = fix.session.createSender(fix.queue);
     Receiver receiver = fix.session.createReceiver(fix.queue);
 
-    const uint count(10);
+    const uint32_t count(10);
     receiver.setCapacity(count);
-    for (uint i = 0; i < count; i++) {
+    for (uint32_t i = 0; i < count; i++) {
         sender.send(Message((boost::format("Message_%1%") % (i+1)).str()));
     }
 
     Message in;
-    for (uint i = 0; i < count; ++i) {
+    for (uint32_t i = 0; i < count; ++i) {
         if (receiver.fetch(in, Duration::SECOND)) {
             BOOST_CHECK_EQUAL(in.getContent(), (boost::format("Message_%1%") % (i+1)).str());
             fix.session.reject(in);
@@ -983,11 +983,11 @@ QPID_AUTO_TEST_CASE(testRejectAndCredit)
         }
     }
     //send another batch of messages
-    for (uint i = 0; i < count; i++) {
+    for (uint32_t i = 0; i < count; i++) {
         sender.send(Message((boost::format("Message_%1%") % (i+count)).str()));
     }
 
-    for (uint i = 0; i < count; ++i) {
+    for (uint32_t i = 0; i < count; ++i) {
         if (receiver.fetch(in, Duration::SECOND)) {
             BOOST_CHECK_EQUAL(in.getContent(), (boost::format("Message_%1%") % (i+count)).str());
         } else {
@@ -1050,20 +1050,20 @@ QPID_AUTO_TEST_CASE(testAcknowledgeUpTo)
 {
     QueueFixture fix;
     Sender sender = fix.session.createSender(fix.queue);
-    const uint count(20);
-    for (uint i = 0; i < count; ++i) {
+    const uint32_t count(20);
+    for (uint32_t i = 0; i < count; ++i) {
         sender.send(Message((boost::format("Message_%1%") % (i+1)).str()));
     }
 
     Session other = fix.connection.createSession();
     Receiver receiver = other.createReceiver(fix.queue);
     std::vector<Message> messages;
-    for (uint i = 0; i < count; ++i) {
+    for (uint32_t i = 0; i < count; ++i) {
         Message msg = receiver.fetch();
         BOOST_CHECK_EQUAL(msg.getContent(), (boost::format("Message_%1%") % (i+1)).str());
         messages.push_back(msg);
     }
-    const uint batch = 10;
+    const uint32_t batch = 10;
     other.acknowledgeUpTo(messages[batch-1]);//acknowledge first 10 messages only
 
     messages.clear();
@@ -1073,7 +1073,7 @@ QPID_AUTO_TEST_CASE(testAcknowledgeUpTo)
     other = fix.connection.createSession();
     receiver = other.createReceiver(fix.queue);
     Message msg;
-    for (uint i = 0; i < (count-batch); ++i) {
+    for (uint32_t i = 0; i < (count-batch); ++i) {
         msg = receiver.fetch();
         BOOST_CHECK_EQUAL(msg.getContent(), (boost::format("Message_%1%") % (i+1+batch)).str());
     }

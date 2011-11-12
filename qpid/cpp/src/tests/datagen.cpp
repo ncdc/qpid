@@ -30,11 +30,11 @@ namespace tests {
 
 struct Args : public qpid::Options
 {
-    uint count;
-    uint minSize;
-    uint maxSize;
-    uint minChar;
-    uint maxChar;
+    uint32_t count;
+    uint32_t minSize;
+    uint32_t maxSize;
+    uint32_t minChar;
+    uint32_t maxChar;
     bool help;
 
     Args() : qpid::Options("Random data generator"),
@@ -70,15 +70,15 @@ struct Args : public qpid::Options
 
 };
 
-uint random(uint min, uint max)
+uint32_t random(uint32_t min, uint32_t max)
 {
     return (rand() % (max-min+1)) + min;
 }
 
-std::string generateData(uint size, uint min, uint max)
+std::string generateData(uint32_t size, uint32_t min, uint32_t max)
 {
     std::string data;
-    for (uint i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         data += (char) random(min, max);
     }
     return data;
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
     Args opts;
     if (opts.parse(argc, argv)) {
         srand(time(0));
-        for (uint i = 0; i < opts.count; i++) {
+        for (uint32_t i = 0; i < opts.count; i++) {
             std::cout << generateData(random(opts.minSize, opts.maxSize), opts.minChar, opts.maxChar) << std::endl;
         }
         return 0;

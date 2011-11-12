@@ -51,7 +51,7 @@ bool PriorityQueue::empty()
 
 void PriorityQueue::reinsert(const QueuedMessage& message)
 {
-    uint p = getPriorityLevel(message);
+    uint8_t p = getPriorityLevel(message);
     messages[p].insert(lower_bound(messages[p].begin(), messages[p].end(), message), message);
     clearCache();
 }
@@ -167,14 +167,14 @@ void PriorityQueue::removeIf(Predicate p)
     }
 }
 
-uint PriorityQueue::getPriorityLevel(const QueuedMessage& m) const
+uint8_t PriorityQueue::getPriorityLevel(const QueuedMessage& m) const
 {
-    uint priority = m.payload->getPriority();
+    uint8_t priority = m.payload->getPriority();
     //Use AMQP 0-10 approach to mapping priorities to a fixed level
     //(see rule priority-level-implementation)
-    const uint firstLevel = 5 - uint(std::min(5.0, std::ceil((double) levels/2.0)));
+    const uint8_t firstLevel = 5 - uint8_t(std::min(5.0, std::ceil((double) levels/2.0)));
     if (priority <= firstLevel) return 0;
-    return std::min(priority - firstLevel, (uint)levels-1);
+    return std::min(priority - firstLevel, (uint8_t)levels-1);
 }
 
 void PriorityQueue::clearCache()
@@ -182,7 +182,7 @@ void PriorityQueue::clearCache()
     cached = false;
 }
 
-bool PriorityQueue::findFrontLevel(uint& l, PriorityLevels& m)
+bool PriorityQueue::findFrontLevel(uint8_t& l, PriorityLevels& m)
 {
     for (int p = levels-1; p >= 0; --p) {
         if (!m[p].empty()) {
@@ -202,7 +202,7 @@ bool PriorityQueue::checkFront()
     return haveFront;
 }
 
-uint PriorityQueue::getPriority(const QueuedMessage& message)
+uint8_t PriorityQueue::getPriority(const QueuedMessage& message)
 {
     const PriorityQueue* queue = dynamic_cast<const PriorityQueue*>(&(message.queue->getMessages()));
     if (queue) return queue->getPriorityLevel(message);

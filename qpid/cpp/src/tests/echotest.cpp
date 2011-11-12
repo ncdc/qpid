@@ -41,8 +41,8 @@ struct  Args : public qpid::Options,
                public qpid::client::ConnectionSettings
 {
     bool help;
-    uint count;
-    uint size;
+    uint32_t count;
+    uint32_t size;
     bool summary;
 
     Args() : qpid::Options("Simple latency test optins"), help(false), count(20), size(0), summary()
@@ -73,26 +73,26 @@ class Listener : public MessageListener
   private:
     Session session;
     SubscriptionManager subscriptions;
-    uint counter;
-    const uint limit;
+    uint32_t counter;
+    const uint32_t limit;
     std::string queue;
     Message request;
     double total, min, max;
     bool summary;
 
   public:
-    Listener(Session& session, uint limit, bool summary);
-    void start(uint size);
+    Listener(Session& session, uint32_t limit, bool summary);
+    void start(uint32_t size);
     void received(Message& message);
 };
 
-Listener::Listener(Session& s, uint l, bool summary_) :
+Listener::Listener(Session& s, uint32_t l, bool summary_) :
     session(s), subscriptions(s), counter(0), limit(l),
     queue(session.getId().getName()), total(),
     min(std::numeric_limits<double>::max()), max(), summary(summary_)
 {}
 
-void Listener::start(uint size)
+void Listener::start(uint32_t size)
 {
     session.queueDeclare(arg::queue=queue, arg::exclusive=true, arg::autoDelete=true);
     request.getDeliveryProperties().setRoutingKey(queue);

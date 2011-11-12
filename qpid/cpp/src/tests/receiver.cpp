@@ -42,10 +42,10 @@ namespace tests {
 struct Args : public qpid::TestOptions
 {
     string queue;
-    uint messages;
+    uint32_t messages;
     bool ignoreDuplicates;
-    uint creditWindow;
-    uint ackFrequency;
+    uint32_t creditWindow;
+    uint32_t ackFrequency;
     bool browse;
 
     Args() : queue("test-queue"), messages(0), ignoreDuplicates(false), creditWindow(0), ackFrequency(1), browse(false)
@@ -66,22 +66,22 @@ const string SN("sn");
 class Receiver : public MessageListener, public FailoverManager::Command
 {
   public:
-    Receiver(const string& queue, uint messages, bool ignoreDuplicates, uint creditWindow, uint ackFrequency, bool browse);
+    Receiver(const string& queue, uint32_t messages, bool ignoreDuplicates, uint32_t creditWindow, uint32_t ackFrequency, bool browse);
     void received(Message& message);
     void execute(AsyncSession& session, bool isRetry);
   private:
     const string queue;
-    const uint count;
+    const uint32_t count;
     const bool skipDups;
     SubscriptionSettings settings;
     Subscription subscription;
-    uint processed;
-    uint lastSn;
+    uint32_t processed;
+    uint32_t lastSn;
 
     bool isDuplicate(Message& message);
 };
 
-Receiver::Receiver(const string& q, uint messages, bool ignoreDuplicates, uint creditWindow, uint ackFrequency, bool browse) :
+Receiver::Receiver(const string& q, uint32_t messages, bool ignoreDuplicates, uint32_t creditWindow, uint32_t ackFrequency, bool browse) :
     queue(q), count(messages), skipDups(ignoreDuplicates), processed(0), lastSn(0)
 {
     if (browse) settings.acquireMode = ACQUIRE_MODE_NOT_ACQUIRED;
@@ -100,7 +100,7 @@ void Receiver::received(Message& message)
 
 bool Receiver::isDuplicate(Message& message)
 {
-    uint sn = message.getHeaders().getAsInt(SN);
+    uint32_t sn = message.getHeaders().getAsInt(SN);
     if (lastSn < sn) {
         lastSn = sn;
         return false;

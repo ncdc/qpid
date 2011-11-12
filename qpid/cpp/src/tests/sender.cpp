@@ -47,9 +47,9 @@ struct Args : public qpid::TestOptions
 {
     string destination;
     string key;
-    uint sendEos;
+    uint32_t sendEos;
     bool durable;
-    uint ttl;
+    uint32_t ttl;
     string lvqMatchValue;
     string lvqMatchFile;
     bool reportTotal;
@@ -82,7 +82,7 @@ const string EOS("eos");
 class Sender : public FailoverManager::Command
 {
   public:
-    Sender(Reporter<Throughput>& reporter, const std::string& destination, const std::string& key, uint sendEos, bool durable, uint ttl,
+    Sender(Reporter<Throughput>& reporter, const std::string& destination, const std::string& key, uint32_t sendEos, bool durable, uint32_t ttl,
            const std::string& lvqMatchValue, const std::string& lvqMatchFile);
     void execute(AsyncSession& session, bool isRetry);
 
@@ -92,12 +92,12 @@ class Sender : public FailoverManager::Command
     const std::string destination;
     MessageReplayTracker sender;
     Message message;
-    const uint sendEos;
-    uint sent;
+    const uint32_t sendEos;
+    uint32_t sent;
     std::ifstream lvqMatchValues;
 };
 
-Sender::Sender(Reporter<Throughput>& rep, const std::string& dest, const std::string& key, uint eos, bool durable, uint ttl, const std::string& lvqMatchValue, const std::string& lvqMatchFile) :
+Sender::Sender(Reporter<Throughput>& rep, const std::string& dest, const std::string& key, uint32_t eos, bool durable, uint32_t ttl, const std::string& lvqMatchValue, const std::string& lvqMatchFile) :
     reporter(rep), destination(dest), sender(10), message("", key), sendEos(eos), sent(0) , lvqMatchValues(lvqMatchFile.c_str())
 {
     if (durable){
@@ -128,7 +128,7 @@ void Sender::execute(AsyncSession& session, bool isRetry)
         reporter.message(dummyMessage); // For statistics
         sender.send(message, destination);
     }
-    for (uint i = sendEos; i > 0; --i) {
+    for (uint32_t i = sendEos; i > 0; --i) {
         message.setData(EOS);
         sender.send(message, destination);
     }

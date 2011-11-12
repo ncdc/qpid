@@ -51,11 +51,11 @@ public:
 
 class Count
 {
-    uint count;
+    uint64_t count;
 public:
     Count() : count(0) {}
     void operator()(const AMQFrame&) { count++; }
-    uint getCount() { return count; }
+    uint64_t getCount() { return count; }
 };
 
 class EncodeFrame
