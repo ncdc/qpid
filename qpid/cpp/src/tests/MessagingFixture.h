@@ -210,19 +210,19 @@ inline std::vector<std::string> fetch(messaging::Receiver& receiver, int count, 
 }
 
 
-inline void send(messaging::Sender& sender, uint count = 1, uint start = 1,
+inline void send(messaging::Sender& sender, uint32_t count = 1, uint32_t start = 1,
           const std::string& base = "Message")
 {
-    for (uint i = start; i < start + count; ++i) {
+    for (uint32_t i = start; i < start + count; ++i) {
         sender.send(messaging::Message((boost::format("%1%_%2%") % base % i).str()));
     }
 }
 
-inline void receive(messaging::Receiver& receiver, uint count = 1, uint start = 1,
+inline void receive(messaging::Receiver& receiver, uint32_t count = 1, uint32_t start = 1,
              const std::string& base = "Message",
              messaging::Duration timeout=messaging::Duration::SECOND*5)
 {
-    for (uint i = start; i < start + count; ++i) {
+    for (uint32_t i = start; i < start + count; ++i) {
         BOOST_CHECK_EQUAL(receiver.fetch(timeout).getContent(), (boost::format("%1%_%2%") % base % i).str());
     }
 }

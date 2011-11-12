@@ -21,7 +21,7 @@
 
 #include "qpid/framing/SendContent.h"
 
-qpid::framing::SendContent::SendContent(FrameHandler& h, uint16_t mfs, uint efc) : handler(h), 
+qpid::framing::SendContent::SendContent(FrameHandler& h, uint16_t mfs, uint64_t efc) : handler(h), 
                                                                                               maxFrameSize(mfs),
                                                                                                expectedFrameCount(efc), frameCount(0) {}
 

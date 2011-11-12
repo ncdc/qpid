@@ -24,7 +24,7 @@
 namespace qpid {
 namespace client {
 
-MessageReplayTracker::MessageReplayTracker(uint f) : flushInterval(f), count(0) {}
+MessageReplayTracker::MessageReplayTracker(uint32_t f) : flushInterval(f), count(0) {}
 
 void MessageReplayTracker::send(const Message& message, const std::string& destination)
 {
@@ -48,12 +48,12 @@ void MessageReplayTracker::replay(AsyncSession s)
     count = 0;
 }
 
-void MessageReplayTracker::setFlushInterval(uint f)
+void MessageReplayTracker::setFlushInterval(uint32_t f)
 {
     flushInterval = f;
 }
 
-uint MessageReplayTracker::getFlushInterval()
+uint32_t MessageReplayTracker::getFlushInterval()
 {
     return flushInterval;
 }

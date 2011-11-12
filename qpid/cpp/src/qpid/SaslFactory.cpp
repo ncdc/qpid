@@ -373,7 +373,7 @@ std::auto_ptr<SecurityLayer> CyrusSasl::getSecurityLayer(uint16_t maxFrameSize)
     if (result != SASL_OK) {
         throw framing::InternalErrorException(QPID_MSG("SASL error: " << sasl_errdetail(conn)));
     }
-    uint ssf = *(reinterpret_cast<const unsigned*>(value));
+    unsigned ssf = *(reinterpret_cast<const unsigned*>(value));
     std::auto_ptr<SecurityLayer> securityLayer;
     if (ssf) {
         QPID_LOG(info, "Installing security layer,  SSF: "<< ssf);

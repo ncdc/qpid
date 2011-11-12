@@ -109,7 +109,7 @@ public:
         std::string realm;
         size_t replayFlushLimit;
         size_t replayHardLimit;
-        uint queueLimit;
+        uint32_t queueLimit;
         bool tcpNoDelay;
         bool requireEncrypted;
         std::string knownHosts;
@@ -118,8 +118,8 @@ public:
         bool asyncQueueEvents;
         bool qmf2Support;
         bool qmf1Support;
-        uint queueFlowStopRatio;    // producer flow control: on
-        uint queueFlowResumeRatio;  // producer flow control: off
+        uint32_t queueFlowStopRatio;    // producer flow control: on
+        uint32_t queueFlowResumeRatio;  // producer flow control: off
         uint16_t queueThresholdEventRatio;
         std::string defaultMsgGroup;
         bool timestampRcvMsgs;

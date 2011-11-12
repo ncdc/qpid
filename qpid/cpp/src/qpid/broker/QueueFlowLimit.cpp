@@ -257,11 +257,11 @@ const std::string QueueFlowLimit::flowResumeCountKey("qpid.flow_resume_count");
 const std::string QueueFlowLimit::flowStopSizeKey("qpid.flow_stop_size");
 const std::string QueueFlowLimit::flowResumeSizeKey("qpid.flow_resume_size");
 uint64_t QueueFlowLimit::defaultMaxSize;
-uint QueueFlowLimit::defaultFlowStopRatio;
-uint QueueFlowLimit::defaultFlowResumeRatio;
+uint8_t QueueFlowLimit::defaultFlowStopRatio;
+uint8_t QueueFlowLimit::defaultFlowResumeRatio;
 
 
-void QueueFlowLimit::setDefaults(uint64_t maxQueueSize, uint flowStopRatio, uint flowResumeRatio)
+void QueueFlowLimit::setDefaults(uint64_t maxQueueSize, uint8_t flowStopRatio, uint8_t flowResumeRatio)
 {
     defaultMaxSize = maxQueueSize;
     defaultFlowStopRatio = flowStopRatio;

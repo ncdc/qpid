@@ -129,11 +129,11 @@ QPID_AUTO_TEST_CASE(testWrapAround)
 QPID_AUTO_TEST_CASE(testCondense)
 {
     SequenceNumberSet set;
-    for (uint i = 0; i < 6; i++) {
+    for (uint32_t i = 0; i < 6; i++) {
         set.push_back(SequenceNumber(i));
     }
     set.push_back(SequenceNumber(7));
-    for (uint i = 9; i < 13; i++) {
+    for (uint32_t i = 9; i < 13; i++) {
         set.push_back(SequenceNumber(i));
     }
     set.push_back(SequenceNumber(13));
@@ -149,7 +149,7 @@ QPID_AUTO_TEST_CASE(testCondense)
 QPID_AUTO_TEST_CASE(testCondenseSingleRange)
 {
     SequenceNumberSet set;
-    for (uint i = 0; i < 6; i++) {
+    for (uint32_t i = 0; i < 6; i++) {
         set.push_back(SequenceNumber(i));
     }
     SequenceNumberSet actual = set.condense();

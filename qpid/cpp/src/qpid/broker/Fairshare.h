@@ -37,24 +37,24 @@ namespace broker {
 class Fairshare : public PriorityQueue
 {
   public:
-    Fairshare(size_t levels, uint limit);
-    bool getState(uint& priority, uint& count) const;
-    bool setState(uint priority, uint count);
-    void setLimit(size_t level, uint limit);
+    Fairshare(size_t levels, uint32_t limit);
+    bool getState(uint8_t& priority, uint32_t& count) const;
+    bool setState(uint8_t priority, uint32_t count);
+    void setLimit(size_t level, uint32_t limit);
     bool isNull();
     static std::auto_ptr<Messages> create(const qpid::framing::FieldTable& settings);
-    static bool getState(const Messages&, uint& priority, uint& count);
-    static bool setState(Messages&, uint priority, uint count);
+    static bool getState(const Messages&, uint8_t& priority, uint32_t& count);
+    static bool setState(Messages&, uint8_t priority, uint32_t count);
   private:
-    std::vector<uint> limits;
+    std::vector<uint32_t> limits;
 
-    uint priority;
-    uint count;
+    uint8_t priority;
+    uint32_t count;
 
-    uint currentLevel();
-    uint nextLevel();
+    uint8_t currentLevel();
+    uint8_t nextLevel();
     bool limitReached();
-    bool findFrontLevel(uint& p, PriorityLevels&);
+    bool findFrontLevel(uint8_t& p, PriorityLevels&);
 };
 }} // namespace qpid::broker
 

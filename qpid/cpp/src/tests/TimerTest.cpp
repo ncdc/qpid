@@ -38,10 +38,10 @@ namespace tests {
 class Counter
 {
     Mutex lock;
-    uint counter;
+    uint32_t counter;
   public:
     Counter() : counter(0) {}
-    uint next()
+    uint32_t next()
     {
         Mutex::ScopedLock l(lock);
         return ++counter;
@@ -54,7 +54,7 @@ class TestTask : public TimerTask
     const Duration expected;
     AbsTime end;
     bool fired;
-    uint position;
+    uint32_t position;
     Monitor monitor;
     Counter& counter;
 
@@ -71,7 +71,7 @@ class TestTask : public TimerTask
         monitor.notify();
     }
 
-    void check(uint expected_position, uint64_t tolerance = 500 * TIME_MSEC)
+    void check(uint32_t expected_position, uint64_t tolerance = 500 * TIME_MSEC)
     {
         Monitor::ScopedLock l(monitor);
         BOOST_CHECK(fired);

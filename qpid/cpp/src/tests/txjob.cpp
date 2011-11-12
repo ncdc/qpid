@@ -41,8 +41,8 @@ struct Args : public qpid::TestOptions
     string workQueue;
     string source;
     string dest;
-    uint messages;
-    uint jobs;
+    uint32_t messages;
+    uint32_t jobs;
     bool quit;
     bool declareQueues;
 
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
             session.queueDeclare(arg::queue=opts.source);
             session.queueDeclare(arg::queue=opts.dest);
         }
-        for (uint i = 0; i < opts.jobs; ++i) {
+        for (uint32_t i = 0; i < opts.jobs; ++i) {
             Message job("transfer", opts.workQueue);
             job.getHeaders().setString("src", opts.source);
             job.getHeaders().setString("dest", opts.dest);

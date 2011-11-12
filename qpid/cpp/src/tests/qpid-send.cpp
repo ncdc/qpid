@@ -51,37 +51,37 @@ struct Options : public qpid::Options
     std::string url;
     std::string connectionOptions;
     std::string address;
-    uint messages;
+    uint32_t messages;
     std::string id;
     std::string replyto;
-    uint sendEos;
+    uint32_t sendEos;
     bool durable;
-    uint ttl;
-    uint priority;
+    uint32_t ttl;
+    uint32_t priority;
     std::string userid;
     std::string correlationid;
     string_vector properties;
     string_vector entries;
     std::string contentString;
-    uint contentSize;
+    uint32_t contentSize;
     bool contentStdin;
-    uint tx;
-    uint rollbackFrequency;
-    uint capacity;
+    uint32_t tx;
+    uint32_t rollbackFrequency;
+    uint32_t capacity;
     bool failoverUpdates;
     qpid::log::Options log;
     bool reportTotal;
-    uint reportEvery;
+    uint32_t reportEvery;
     bool reportHeader;
-    uint sendRate;
-    uint flowControl;
+    uint32_t sendRate;
+    uint32_t flowControl;
     bool sequence;
     bool timestamp;
     std::string groupKey;
     std::string groupPrefix;
-    uint groupSize;
+    uint32_t groupSize;
     bool groupRandSize;
-    uint groupInterleave;
+    uint32_t groupInterleave;
 
     Options(const std::string& argv0=std::string())
         : qpid::Options("Options"),
@@ -273,15 +273,15 @@ class GroupGenerator {
 public:
     GroupGenerator(const std::string& key,
                    const std::string& prefix,
-                   const uint size,
+                   const uint32_t size,
                    const bool randomize,
-                   const uint interleave)
+                   const uint32_t interleave)
         : groupKey(key), groupPrefix(prefix), groupSize(size),
           randomizeSize(randomize), groupSuffix(0)
     {
         if (randomize) srand((unsigned int)qpid::sys::SystemInfo::getProcessId());
 
-        for (uint i = 0; i < 1 || i < interleave; ++i) {
+        for (uint32_t i = 0; i < 1 || i < interleave; ++i) {
             newGroup();
         }
         current = groups.begin();
@@ -303,16 +303,16 @@ public:
   private:
     const std::string& groupKey;
     const std::string& groupPrefix;
-    const uint groupSize;
+    const uint32_t groupSize;
     const bool randomizeSize;
 
-    uint groupSuffix;
+    uint32_t groupSuffix;
 
     struct GroupState {
         std::string id;
-        const uint size;
-        uint count;
-        GroupState( const std::string& i, const uint s )
+        const uint32_t size;
+        uint32_t count;
+        GroupState( const std::string& i, const uint32_t s )
             : id(i), size(s), count(0) {}
     };
     typedef std::list<GroupState> GroupList;
@@ -322,7 +322,7 @@ public:
     void newGroup() {
         std::ostringstream groupId(groupPrefix, ios_base::out|ios_base::ate);
         groupId << groupSuffix++;
-        uint size = (randomizeSize) ? (rand() % groupSize) + 1 : groupSize;
+        uint32_t size = (randomizeSize) ? (rand() % groupSize) + 1 : groupSize;
         // std::cout << "New group: GROUPID=[" << groupId.str() << "] size=" << size << std::endl;
         GroupState group( groupId.str(), size );
         groups.push_back( group );
@@ -357,8 +357,8 @@ int main(int argc, char ** argv)
             if (!opts.userid.empty()) msg.setUserId(opts.userid);
             if (!opts.correlationid.empty()) msg.setCorrelationId(opts.correlationid);
             opts.setProperties(msg);
-            uint sent = 0;
-            uint txCount = 0;
+            uint32_t sent = 0;
+            uint32_t txCount = 0;
             Reporter<Throughput> reporter(std::cout, opts.reportEvery, opts.reportHeader);
 
             std::auto_ptr<ContentGenerator> contentGen;
@@ -387,7 +387,7 @@ int main(int argc, char ** argv)
 
             Receiver flowControlReceiver;
             Address flowControlAddress("flow-"+Uuid(true).str()+";{create:always,delete:always}");
-            uint flowSent = 0;
+            uint32_t flowSent = 0;
             if (opts.flowControl) {
                 flowControlReceiver = session.createReceiver(flowControlAddress);
                 flowControlReceiver.setCapacity(2);
@@ -437,7 +437,7 @@ int main(int argc, char ** argv)
             for ( ; flowSent>0; --flowSent)
                 flowControlReceiver.get(Duration::SECOND);
             if (opts.reportTotal) reporter.report();
-            for (uint i = opts.sendEos; i > 0; --i) {
+            for (uint32_t i = opts.sendEos; i > 0; --i) {
                 if (opts.sequence)
                     msg.getProperties()[SN] = ++sent;
                 msg.setContent(EOS); //TODO: add in ability to send digest or similar

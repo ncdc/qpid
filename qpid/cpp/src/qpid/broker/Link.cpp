@@ -346,7 +346,7 @@ bool Link::hideManagement() const {
     return !mgmtObject || ( broker && broker->isInCluster());
 }
 
-uint Link::nextChannel()
+uint16_t Link::nextChannel()
 {
     Mutex::ScopedLock mutex(lock);
 

@@ -67,7 +67,7 @@ namespace qpid {
             Bridges created;   // Bridges pending creation
             Bridges active;    // Bridges active
             Bridges cancellations;    // Bridges pending cancellation
-            uint channelCounter;
+            uint16_t channelCounter;
             Connection* connection;
             management::ManagementAgent* agent;
 
@@ -107,7 +107,7 @@ namespace qpid {
             uint16_t    getPort() { return port; }
             bool isDurable() { return durable; }
             void maintenanceVisit ();
-            uint nextChannel();
+            uint16_t nextChannel();
             void add(Bridge::shared_ptr);
             void cancel(Bridge::shared_ptr);
 

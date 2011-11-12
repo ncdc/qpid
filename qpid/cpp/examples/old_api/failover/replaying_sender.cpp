@@ -38,18 +38,18 @@ using namespace std;
 class Sender : public FailoverManager::Command
 {
   public:
-    Sender(const std::string& queue, uint count);
+    Sender(const std::string& queue, uint32_t count);
     void execute(AsyncSession& session, bool isRetry);
-    uint getSent();
+    uint32_t getSent();
   private:
     MessageReplayTracker sender;
-    const uint count;
-    uint sent;
+    const uint32_t count;
+    uint32_t sent;
     Message message;
     
 };
 
-Sender::Sender(const std::string& queue, uint count_) : sender(10), count(count_), sent(0) 
+Sender::Sender(const std::string& queue, uint32_t count_) : sender(10), count(count_), sent(0) 
 {
     message.getDeliveryProperties().setRoutingKey(queue);
 }
@@ -72,7 +72,7 @@ void Sender::execute(AsyncSession& session, bool isRetry)
     sender.send(message);
 }
 
-uint Sender::getSent()
+uint32_t Sender::getSent()
 {
     return sent;
 }

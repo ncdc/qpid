@@ -42,8 +42,8 @@ namespace tests {
 typedef vector<string> StringSet;
 
 struct Args : public qpid::TestOptions {
-    uint count;
-    uint ack;
+    uint32_t count;
+    uint32_t ack;
     string queue;
     bool declare;
     bool summary;

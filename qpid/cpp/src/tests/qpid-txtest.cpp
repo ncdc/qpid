@@ -48,13 +48,13 @@ typedef std::vector<std::string> StringSet;
 
 struct Args : public qpid::TestOptions {
     bool init, transfer, check;//actions
-    uint size;
+    uint32_t size;
     bool durable;
-    uint queues;
+    uint32_t queues;
     string base;
-    uint msgsPerTx;
-    uint txCount;
-    uint totalMsgCount;
+    uint32_t msgsPerTx;
+    uint32_t txCount;
+    uint32_t totalMsgCount;
     bool dtx;
     bool quiet;
 
@@ -82,22 +82,22 @@ struct Args : public qpid::TestOptions {
 
 const std::string chars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
-std::string generateData(uint size)
+std::string generateData(uint32_t size)
 {
     if (size < chars.length()) {
         return chars.substr(0, size);
     }
     std::string data;
-    for (uint i = 0; i < (size / chars.length()); i++) {
+    for (uint32_t i = 0; i < (size / chars.length()); i++) {
         data += chars;
     }
     data += chars.substr(0, size % chars.length());
     return data;
 }
 
-void generateSet(const std::string& base, uint count, StringSet& collection)
+void generateSet(const std::string& base, uint32_t count, StringSet& collection)
 {
-    for (uint i = 0; i < count; i++) {
+    for (uint32_t i = 0; i < count; i++) {
         std::ostringstream out;
         out << base << "-" << (i+1);
         collection.push_back(out.str());
@@ -150,14 +150,14 @@ struct Transfer : public Client, public Runnable
             settings.autoAck = 0; // Disabled
             Subscription sub = subs.subscribe(lq, src, settings);
 
-            for (uint t = 0; t < opts.txCount; t++) {
+            for (uint32_t t = 0; t < opts.txCount; t++) {
                 Message in;
                 Message out("", dest);
                 if (opts.dtx) {
                     setNewXid(xid);
                     session.dtxStart(arg::xid=xid);
                 }
-                for (uint m = 0; m < opts.msgsPerTx; m++) {
+                for (uint32_t m = 0; m < opts.msgsPerTx; m++) {
                     in = lq.pop();
                     std::string& data = in.getData();
                     if (data.size() != opts.size) {
@@ -279,7 +279,7 @@ struct Controller : public Client
             session.messageFlush(arg::destination=*i);
             session.sync();
 
-            uint count(0);
+            uint32_t count(0);
             while (!lq.empty()) {
                 Message m = lq.pop();
                 //add correlation ids of received messages to drained

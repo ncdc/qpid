@@ -362,8 +362,8 @@ class TestMessageStoreOC : public MessageStore
     uint64_t nextPersistenceId;
   public:
 
-    uint enqCnt;
-    uint deqCnt;
+    uint32_t enqCnt;
+    uint32_t deqCnt;
     bool error;
 
     TestMessageStoreOC() : MessageStore(),nextPersistenceId(1),enqCnt(0),deqCnt(0),error(false) {}
@@ -668,9 +668,9 @@ QPID_AUTO_TEST_CASE(testLVQRecover){
     BOOST_CHECK_EQUAL(testStore.deqCnt, 1u);
 }
 
-void addMessagesToQueue(uint count, Queue& queue, uint oddTtl = 200, uint evenTtl = 0)
+void addMessagesToQueue(uint32_t count, Queue& queue, uint32_t oddTtl = 200, uint32_t evenTtl = 0)
 {
-    for (uint i = 0; i < count; i++) {
+    for (uint32_t i = 0; i < count; i++) {
         intrusive_ptr<Message> m = create_message("exchange", "key", i % 2 ? oddTtl : evenTtl);
         m->computeExpiration(new broker::ExpiryPolicy);
         queue.deliver(m);

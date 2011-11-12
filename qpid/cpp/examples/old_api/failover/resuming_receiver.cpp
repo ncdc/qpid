@@ -47,9 +47,9 @@ class Listener : public MessageListener,
     void editUrlList(std::vector<Url>& urls);
   private:
     Subscription subscription;
-    uint count;
-    uint skipped;
-    uint lastSn;
+    uint32_t count;
+    uint32_t skipped;
+    uint32_t lastSn;
     bool gaps;
 };
 
@@ -64,7 +64,7 @@ void Listener::received(Message & message)
         std::cout << "Listener received " << count << " messages (" << skipped << " skipped)" << std::endl;
         subscription.cancel();
     } else {
-        uint sn = message.getHeaders().getAsInt("sn");
+        uint32_t sn = message.getHeaders().getAsInt("sn");
         if (lastSn < sn) {
             if (sn - lastSn > 1) {
                 std::cout << "Error: gap in sequence between " << lastSn << " and " << sn << std::endl;

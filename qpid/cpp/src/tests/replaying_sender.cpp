@@ -41,25 +41,25 @@ namespace tests {
 class Sender : public FailoverManager::Command
 {
   public:
-    Sender(const std::string& queue, uint count, uint reportFreq);
+    Sender(const std::string& queue, uint32_t count, uint32_t reportFreq);
     void execute(AsyncSession& session, bool isRetry);
-    uint getSent();
+    uint32_t getSent();
 
     void setVerbosity   ( int v ) { verbosity   = v; }
     void setPersistence ( int p ) { persistence = p; }
 
   private:
     MessageReplayTracker sender;
-    const uint count;
-    uint sent;
-    const uint reportFrequency;
+    const uint32_t count;
+    uint32_t sent;
+    const uint32_t reportFrequency;
     Message message;
     int verbosity;
     int persistence;
     string queueName;
 };
 
-Sender::Sender(const std::string& queue, uint count_, uint reportFreq ) 
+Sender::Sender(const std::string& queue, uint32_t count_, uint32_t reportFreq ) 
     : sender(10), 
       count(count_), 
       sent(0), 
@@ -106,7 +106,7 @@ void Sender::execute(AsyncSession& session, bool isRetry)
       std::cout << "SENDER COMPLETED\n";
 }
 
-uint Sender::getSent()
+uint32_t Sender::getSent()
 {
     return sent;
 }

@@ -55,8 +55,8 @@ struct Transfer : MessageListener
     std::string control;
     std::string source;
     std::string destination;
-    uint expected;
-    uint transfered;
+    uint32_t expected;
+    uint32_t transfered;
     SubscriptionSettings controlSettings;
     Subscription controlSubscription;
     SubscriptionSettings sourceSettings;
